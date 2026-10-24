@@ -1,34 +1,27 @@
-from pathlib import Path
-from collections.abc import Generator
-
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
+from sqlalchemy.orm import declarative_base, sessionmaker
 
 from app.core.config import settings
 
+# For SQLite, check_same_thread needs to be False for multithreaded FastAPI / tests
+connect_args = (
+    {"check_same_thread": False}
+    if settings.DATABASE_URL.startswith("sqlite")
+    else {}
+)
 
-class Base(DeclarativeBase):
-    pass
+engine = create_engine(
+    settings.DATABASE_URL,
+    connect_args=connect_args,
+)
 
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-if settings.database_url.startswith("sqlite:///"):
-    database_path = settings.database_url.removeprefix("sqlite:///")
-    Path(database_path).parent.mkdir(parents=True, exist_ok=True)
-    engine = create_engine(
-        settings.database_url,
-        connect_args={"check_same_thread": False},
-    )
-else:
-    engine = create_engine(settings.database_url)
-
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
-
-
-def create_tables() -> None:
-    Base.metadata.create_all(bind=engine)
+Base = declarative_base()
 
 
-def get_db() -> Generator[Session, None, None]:
+def get_db():
+    """Dependency that yields a database session per request."""
     db = SessionLocal()
     try:
         yield db

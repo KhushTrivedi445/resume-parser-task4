@@ -23,9 +23,6 @@ async def parse_resume(file: UploadFile = File(...)):
         pdf_bytes = await validate_resume_file(file)
 
         resume_text = extract_text_from_pdf(pdf_bytes)
-        print("=== EXTRACTED RESUME TEXT ===")
-        print(resume_text)
-
         parsed_resume = parse_resume_text(resume_text)
 
         return parsed_resume

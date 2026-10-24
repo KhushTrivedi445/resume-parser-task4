@@ -106,20 +106,9 @@ def extract_name(text: str) -> str | None:
 
 
 def extract_skills(text: str) -> list[str]:
-    """Find known skills mentioned in the resume."""
-    found_skills = []
-
-    for skill in KNOWN_SKILLS:
-        pattern = (
-            r"(?<!\w)"
-            + re.escape(skill)
-            + r"(?!\w)"
-        )
-
-        if re.search(pattern, text, re.IGNORECASE):
-            found_skills.append(skill)
-
-    return found_skills
+    """Find known skills mentioned in the resume using boundary-safe normalized matching."""
+    from app.services.rag.skill_matcher import extract_skills_from_text
+    return extract_skills_from_text(text)
 
 
 

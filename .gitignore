@@ -1,8 +1,30 @@
+# Byte-compiled / optimized files
 __pycache__/
 *.py[cod]
-.pytest_cache/
+*$py.class
+
+# Virtual environments
 .venv/
 venv/
+env/
+ENV/
+
+# Environment and sensitive secrets
 .env
+.env.local
+
+# Testing and coverage caches
+.pytest_cache/
+.coverage
+htmlcov/
+*.log
+
+# Data and SQLite databases
 data/*.db
 data/*.sqlite
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
