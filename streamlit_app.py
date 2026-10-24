@@ -3,6 +3,7 @@ Streamlit Web Application for Resume Parser & RAG-Based Job Matching System
 CODTECH Internship Project - Advanced AI/ML & Backend Architecture
 """
 
+import html
 import json
 from io import BytesIO
 from typing import Dict, List, Optional
@@ -27,78 +28,100 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-# Custom CSS for Modern, Premium UI
+# Custom CSS for Modern, Premium Dark & Light UI
 st.markdown(
     """
     <style>
     .main-header {
         font-size: 2.2rem;
-        font-weight: 700;
-        background: linear-gradient(90deg, #2563eb, #7c3aed, #06b6d4);
+        font-weight: 800;
+        background: linear-gradient(90deg, #38bdf8, #818cf8, #c084fc);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin-bottom: 0.2rem;
+        letter-spacing: -0.02em;
     }
     .sub-header {
         font-size: 1.05rem;
-        color: #64748b;
+        color: #94a3b8;
         margin-bottom: 1.5rem;
+        line-height: 1.5;
     }
+
+    /* Badges with explicit high contrast */
     .badge {
         display: inline-block;
-        padding: 0.25rem 0.6rem;
-        font-size: 0.78rem;
+        padding: 0.28rem 0.65rem;
+        font-size: 0.8rem;
         font-weight: 600;
         border-radius: 9999px;
         margin-right: 0.4rem;
         margin-bottom: 0.4rem;
     }
     .badge-matched {
-        background-color: #dcfce7;
-        color: #15803d;
-        border: 1px solid #bbf7d0;
+        background-color: rgba(34, 197, 94, 0.18);
+        color: #4ade80 !important;
+        border: 1px solid rgba(74, 222, 128, 0.4);
     }
     .badge-missing {
-        background-color: #fee2e2;
-        color: #b91c1c;
-        border: 1px solid #fecaca;
+        background-color: rgba(239, 68, 68, 0.18);
+        color: #f87171 !important;
+        border: 1px solid rgba(248, 113, 113, 0.4);
     }
     .badge-pref-matched {
-        background-color: #e0f2fe;
-        color: #0369a1;
-        border: 1px solid #bae6fd;
+        background-color: rgba(56, 189, 248, 0.18);
+        color: #38bdf8 !important;
+        border: 1px solid rgba(56, 189, 248, 0.4);
     }
     .badge-pref-missing {
-        background-color: #fef3c7;
-        color: #b45309;
-        border: 1px solid #fde68a;
+        background-color: rgba(245, 158, 11, 0.18);
+        color: #fbbf24 !important;
+        border: 1px solid rgba(251, 191, 36, 0.4);
     }
+
+    /* KPI Metric Cards - Dark Theme Cohesive */
     .metric-card {
-        background-color: #ffffff;
+        background-color: #1e293b;
         border-radius: 12px;
-        padding: 1rem 1.2rem;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        border: 1px solid #e2e8f0;
+        padding: 1.1rem 1.2rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25), 0 2px 4px -2px rgba(0, 0, 0, 0.25);
+        border: 1px solid #334155;
         text-align: center;
+        transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .metric-card:hover {
+        border-color: #475569;
+        transform: translateY(-2px);
     }
     .metric-val {
-        font-size: 2rem;
-        font-weight: 700;
-        color: #1e293b;
+        font-size: 2.1rem;
+        font-weight: 800;
+        color: #f8fafc;
+        line-height: 1.2;
+        margin-top: 0.2rem;
     }
     .metric-lbl {
-        font-size: 0.85rem;
-        color: #64748b;
+        font-size: 0.82rem;
+        color: #94a3b8;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
+        letter-spacing: 0.06em;
+        font-weight: 600;
     }
+
+    /* Evidence Box - Fixed White-on-White Glitch */
     .evidence-box {
-        background-color: #f8fafc;
-        border-left: 4px solid #3b82f6;
-        padding: 0.8rem 1rem;
-        border-radius: 0 8px 8px 0;
-        margin-bottom: 0.8rem;
-        font-size: 0.92rem;
+        background-color: #0f172a !important;
+        color: #f1f5f9 !important;
+        border: 1px solid #334155 !important;
+        border-left: 4px solid #38bdf8 !important;
+        padding: 0.95rem 1.25rem !important;
+        border-radius: 4px 10px 10px 4px !important;
+        margin-top: 0.6rem !important;
+        margin-bottom: 0.8rem !important;
+        font-size: 0.93rem !important;
+        line-height: 1.65 !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35) !important;
+        word-break: break-word !important;
     }
     </style>
     """,
@@ -277,7 +300,7 @@ with tab_match:
                 f"""
                 <div class="metric-card">
                     <div class="metric-lbl">Deterministic Match Score</div>
-                    <div class="metric-val" style="color: {'#16a34a' if score_val and score_val >= 70 else '#2563eb' if score_val and score_val >= 50 else '#ea580c'};">{score_display}</div>
+                    <div class="metric-val" style="color: {'#4ade80' if score_val and score_val >= 70 else '#38bdf8' if score_val and score_val >= 50 else '#fb923c'};">{score_display}</div>
                 </div>
                 """,
                 unsafe_allow_html=True,
@@ -390,8 +413,9 @@ with tab_match:
             badge_class = "badge-matched" if item.match_classification == "explicit_match" else "badge-pref-matched" if item.match_classification == "semantically_supported" else "badge-missing"
             with st.expander(f"Requirement: {item.requirement} ({item.match_classification.replace('_', ' ').title()})"):
                 score_str = f"Relevance Score: {item.relevance_score:.3f}" if item.relevance_score is not None else ""
-                st.markdown(f'<span class="badge {badge_class}">{item.match_classification}</span> {score_str}', unsafe_allow_html=True)
-                st.markdown(f"""<div class="evidence-box">"{item.supporting_passage}"</div>""", unsafe_allow_html=True)
+                st.markdown(f'<span class="badge {badge_class}">{item.match_classification}</span> <span style="color: #94a3b8; font-size: 0.88rem; font-weight: 500; margin-left: 0.4rem;">{score_str}</span>', unsafe_allow_html=True)
+                escaped_passage = html.escape(item.supporting_passage)
+                st.markdown(f'<div class="evidence-box">"{escaped_passage}"</div>', unsafe_allow_html=True)
 
         st.divider()
 
