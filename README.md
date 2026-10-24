@@ -489,7 +489,63 @@ The Retrieval-Augmented Generation (RAG) subsystem operates as follows:
 
 ---
 
-## 18. Privacy & Security Considerations
+## 18. LangSmith Observability & Tracing Architecture
+
+The application is instrumented using native **LangSmith 0.14.12** tracing to provide complete, granular visibility into every step of the RAG pipeline.
+
+### Trace Span Hierarchy
+```text
+resume_job_rag_matching (chain)
+ ├── build_faiss_vector_store (tool)
+ │    └── captures: chunk_count, embedding_model, total characters
+ ├── evidence_classification_and_scoring (chain)
+ │    ├── faiss_retrieve_with_scores (retriever) [Requirement: Python]
+ │    ├── faiss_retrieve_with_scores (retriever) [Requirement: FastAPI]
+ │    ├── faiss_retrieve_with_scores (retriever) [Requirement: Docker]
+ │    ├── faiss_retrieve_with_scores (retriever) [Requirement: FAISS]
+ │    └── outputs: explicit_match / semantically_supported / unevidenced classifications
+ └── generate_matching_insights (chain)
+      └── ChatGroq (llm)
+           └── captures: prompt, temperature, completion tokens, latency
+```
+
+### Inspecting Retrieval and Distances
+- Each `faiss_retrieve_with_scores` span records the **exact query**, **requested $k$**, **chunk metadata** (`chunk_id`, `char_length`), **raw FAISS L2 distance**, and the **heuristic similarity score**.
+- **Investigating Unrelated Passage Drift (e.g., FAISS Requirement):**
+  When a candidate's resume does not contain a requirement like `FAISS`, FAISS returns the nearest neighbor passage (which may be an extracurricular activities passage). Because the span exposes the raw distance ($> 1.2$) and the classification is assigned as `unevidenced` ($Sim < 0.55$), auditors can easily inspect the run in the LangSmith UI to see that the candidate did not have the skill and the system correctly rejected the passage as evidence.
+
+### Running a Repeatable Real-Data Test
+Execute the automated test script to run a real resume PDF and job description against the endpoint and view the live trace in LangSmith:
+```bash
+python scripts/test_real_matching_trace.py
+```
+
+---
+
+## 19. RAG Evaluation Framework
+
+A dedicated evaluation workflow is located in `evaluation/`, decoupling retrieval evaluation from generation evaluation.
+
+### Evaluation Metrics
+| Metric | Focus | Description |
+|---|---|---|
+| **Retrieval Relevance** | Retrieval | Measures whether retrieved passages support associated requirements and penalizes unevidenced semantic drift. |
+| **Context Precision** | Retrieval | Signal-to-noise ratio: proportion of retrieved passages containing actionable evidence. |
+| **Context Recall** | Retrieval | Ground-truth coverage: checks whether all expected resume skills were successfully retrieved. |
+| **Faithfulness** | Generation | Hallucination prevention: verifies that generated strengths and recommendations do not falsely claim missing skills. |
+| **Answer Correctness** | Generation | Agreement between calculated match scores / skill sets and human-annotated reference labels. |
+| **Operational Health** | Performance | Latency measurement and error-free pipeline execution rate. |
+
+### Running Evaluation Experiments
+Run the benchmark evaluation experiment on LangSmith:
+```bash
+python evaluation/run_evaluation.py
+```
+This syncs the `resume-rag-eval-benchmark` dataset with LangSmith and logs an experiment (e.g. `rag-eval-suite-...`) with per-example scoring and comparison charts.
+
+---
+
+## 20. Privacy & Security Considerations
 
 - **Stateless Execution:** Uploaded resume PDFs and vector embeddings reside strictly in temporary execution memory and are discarded when the HTTP response completes.
 - **No Inadvertent Persistence:** Resumes are never permanently written to disk or third-party vector databases.
@@ -503,7 +559,7 @@ The Retrieval-Augmented Generation (RAG) subsystem operates as follows:
 
 ---
 
-## 19. Known Limitations
+## 21. Known Limitations
 
 - **Scanned Resumes:** Does not currently include an OCR engine (e.g. Tesseract). Image-only or scanned PDFs without text layers will be rejected with an informative error message.
 - **Skill Taxonomy Breadth:** Skill extraction relies on an extensible curated taxonomy of ~50 core programming languages, frameworks, cloud platforms, and tools. Uncatalogued niche technologies may rely primarily on semantic vector retrieval.
@@ -511,9 +567,10 @@ The Retrieval-Augmented Generation (RAG) subsystem operates as follows:
 
 ---
 
-## 20. Future Improvements
+## 22. Future Improvements
 
 1. **OCR Integration:** Support scanned and image-based PDFs using Tesseract OCR or EasyOCR with fallback detection.
 2. **Dynamic Skill Expansion:** Integrate an open-source NER model (e.g., fine-tuned spaCy or GLiNER) to identify emerging technologies outside the built-in taxonomy.
 3. **Downloadable PDF Matching Reports:** Add an export endpoint (`GET /api/v1/matching/report/pdf`) generating a styled evaluation PDF for recruiters using ReportLab.
 4. **Batch Matching:** Add an asynchronous Celery/Redis queue for ranking a pool of 500+ resumes against a single job description concurrently.
+

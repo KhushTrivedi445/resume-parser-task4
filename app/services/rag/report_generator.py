@@ -2,6 +2,7 @@ import json
 import logging
 from typing import Dict, List, Optional
 from langchain_groq import ChatGroq
+from langsmith import traceable
 
 from app.core.config import settings
 
@@ -25,6 +26,29 @@ def get_report_llm() -> Optional[ChatGroq]:
     )
 
 
+def _process_insights_inputs(inputs: dict) -> dict:
+    return {
+        "deterministic_facts": inputs.get("deterministic_facts", {}),
+        "retrieved_evidence_count": len(inputs.get("retrieved_evidence", [])),
+        "evaluated_requirements": [
+            e.get("requirement")
+            for e in inputs.get("retrieved_evidence", [])
+            if isinstance(e, dict) and e.get("requirement")
+        ],
+        "resume_preview": (inputs.get("resume_text", "")[:150] + "...")
+        if len(inputs.get("resume_text", "")) > 150
+        else inputs.get("resume_text", ""),
+        "jd_preview": (inputs.get("job_description", "")[:150] + "...")
+        if len(inputs.get("job_description", "")) > 150
+        else inputs.get("job_description", ""),
+    }
+
+
+@traceable(
+    name="generate_matching_insights",
+    run_type="chain",
+    process_inputs=_process_insights_inputs,
+)
 def generate_llm_insights(
     resume_text: str,
     job_description: str,

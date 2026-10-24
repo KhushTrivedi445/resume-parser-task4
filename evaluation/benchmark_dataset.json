@@ -1,0 +1,54 @@
+[
+  {
+    "inputs": {
+      "resume_text": "Jane Doe - Senior Backend & AI Engineer\nEmail: jane.doe@example.com\n\nTECHNICAL SKILLS:\nPython, FastAPI, Docker, PostgreSQL, Redis, LangChain, PyTorch\n\nEXPERIENCE:\nSenior Backend Engineer at CloudScale (2022 - Present)\n- Architected high-throughput microservices using Python and FastAPI.\n- Optimized PostgreSQL databases and designed schemas.\n- Containerized applications with Docker.\n- Built vector search workflows using LangChain and HuggingFace sentence-transformers.\n\nSoftware Developer at DataCorp (2019 - 2022)\n- Built backend REST APIs in Python with PostgreSQL.\n- Maintained Redis cache clusters.\n\nEXTRACURRICULAR:\nPresident of University Badminton Club.",
+      "job_description": "Position: Senior AI Backend Engineer\n\nRequired Skills:\n- Python backend development\n- REST APIs with FastAPI\n- Docker containerization\n- PostgreSQL database design\n- FAISS vector database experience\n\nPreferred Skills:\n- Kubernetes orchestration\n- Redis caching"
+    },
+    "outputs": {
+      "reference_match_score": 80.0,
+      "reference_matched_skills": ["Docker", "FastAPI", "PostgreSQL", "Python", "Redis"],
+      "reference_missing_skills": ["FAISS", "Kubernetes"],
+      "expected_relevant_evidence": {
+        "Python": ["Python", "FastAPI", "REST APIs"],
+        "FastAPI": ["FastAPI", "microservices"],
+        "Docker": ["Docker", "Containerized"],
+        "PostgreSQL": ["PostgreSQL", "database"]
+      },
+      "expected_unsupported_requirements": ["FAISS", "Kubernetes"],
+      "unrelated_drift_terms": ["Badminton", "Extracurricular", "Club"]
+    }
+  },
+  {
+    "inputs": {
+      "resume_text": "Alex Smith - Frontend Specialist\nEmail: alex@example.com\n\nTECHNICAL SKILLS:\nReact, TypeScript, CSS, HTML5, JavaScript, Tailwind\n\nEXPERIENCE:\nFrontend Developer at WebCorp (2021 - Present)\n- Developed responsive user interfaces using React and TypeScript.\n- Integrated REST endpoints and managed state with Redux.",
+      "job_description": "Position: Machine Learning Engineer\n\nRequired Skills:\n- Python programming\n- PyTorch deep learning framework\n- Docker containerization"
+    },
+    "outputs": {
+      "reference_match_score": 0.0,
+      "reference_matched_skills": [],
+      "reference_missing_skills": ["Docker", "PyTorch", "Python"],
+      "expected_relevant_evidence": {},
+      "expected_unsupported_requirements": ["Python", "PyTorch", "Docker"],
+      "unrelated_drift_terms": ["React", "TypeScript", "Frontend"]
+    }
+  },
+  {
+    "inputs": {
+      "resume_text": "Carlos Gomez - Full Stack Developer\nEmail: carlos@example.com\n\nTECHNICAL SKILLS:\nPython, Django, PostgreSQL, Docker, AWS, Git\n\nEXPERIENCE:\nFull Stack Engineer at SaaSify (2020 - Present)\n- Built Django backend services with PostgreSQL databases.\n- Deployed production workloads to AWS using Docker containers.",
+      "job_description": "Position: Python Web Developer\n\nRequired Skills:\n- Python programming\n- PostgreSQL database modeling\n- Docker containerization\n\nPreferred Skills:\n- AWS cloud experience"
+    },
+    "outputs": {
+      "reference_match_score": 100.0,
+      "reference_matched_skills": ["AWS", "Docker", "PostgreSQL", "Python"],
+      "reference_missing_skills": [],
+      "expected_relevant_evidence": {
+        "Python": ["Python", "Django"],
+        "PostgreSQL": ["PostgreSQL", "databases"],
+        "Docker": ["Docker", "containers"],
+        "AWS": ["AWS", "cloud"]
+      },
+      "expected_unsupported_requirements": [],
+      "unrelated_drift_terms": []
+    }
+  }
+]
