@@ -8,6 +8,16 @@ import json
 from io import BytesIO
 from typing import Dict, List, Optional
 import streamlit as st
+import os
+
+# Inject Streamlit Cloud secrets into os.environ (skipped gracefully if running locally without secrets.toml)
+try:
+    for k, v in st.secrets.items():
+        if isinstance(v, (str, int, float, bool)):
+            os.environ[k] = str(v)
+except Exception:
+    pass
+
 
 from app.core.config import settings
 from app.schemas.matching import MatchingResponse
